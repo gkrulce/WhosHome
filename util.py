@@ -3,6 +3,7 @@ import subprocess
 import time
 import re
 import datetime
+import time
 
 from constants import mac_to_user_dict
 
@@ -16,16 +17,18 @@ def populateArpTable():
         print "NMAP COMMAND FAILED. THIS IS WHAT WAS RETURNED"
         print ret_string
 
-def getConnectedUsers():
+def getMACAddresses():
     macs = []
-    users = []
     with open("/proc/net/arp") as f:
         for l in f:
             m = re.match(arpTableRE, l)
             if m:
                 if(m.group(2) != "00:00:00:00:00:00"):
                     macs.append(str(m.group(2)).upper())
-
+    return macs
+def getUsers():
+    users = []
+    macs = getMACAddresses()
     for m in macs:
         if(m in mac_to_user_dict):
             user = mac_to_user_dict[m]
@@ -36,8 +39,14 @@ def getConnectedUsers():
 
     return users
 
+def dumpToFile(users, macs):
+    with open("humanReadable.txt", "a") as f:
+        f.write("{0} {1}\n".format(str(datetime.datetime.today())[:-7], users))
+
+    with open("machineReadable.txt", "a") as f:
+        f.write("{0}\t{1}\n".format(time.time(), macs))
 
 if __name__ == '__main__':
     populateArpTable()
-    users = getConnectedUsers()
+    users = getUsers()
     print "{0} {1}".format(str(datetime.datetime.today())[:-7], users)
