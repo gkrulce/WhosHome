@@ -2,6 +2,6 @@
 
 while true
 do
-    python -c "from util import *; dumpToFile(getUsers(), getMACAddresses())"
+    python -c "from util import *; populateArpTable(); dumpToFile(getUsers(), getMACAddresses())"
     sleep 60
 done
