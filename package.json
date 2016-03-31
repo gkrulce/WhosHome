@@ -1,0 +1,9 @@
+{
+  "name": "whohome",
+  "version": "1.0.0",
+  "description": "Creates a simple HTTP endpoint for web interface",
+  "main": "index.js",
+  "dependencies": {
+    "express": "^4.13.4"
+  }
+}

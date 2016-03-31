@@ -2,3 +2,5 @@
 *.txt
 nohup.out
 constants.py
+constants.json
+node_modules
