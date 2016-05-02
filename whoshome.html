@@ -1,0 +1,39 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Who's Home?</title>
+</head>
+
+<body>
+    <h1 id="title">Loading... </h1>
+    <div id="data">
+
+    </div>
+    <script>
+        var startTime = new Date();
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (xhttp.readyState == 4 && xhttp.status == 200) {
+                var innerHtml = "";
+                var res = JSON.parse(xhttp.responseText);
+                for(var i = 0; i < res.length ; i++) {
+                    var d = res[i]['date'];
+                    var user = res[i]['user'];
+                    innerHtml += user;
+                    innerHtml += "\t";
+                    innerHtml += new Date(d*1000);
+                    innerHtml += "<br />";
+                }
+                var endTime = new Date();
+                var diff = endTime - startTime;
+                document.getElementById("title").innerHTML= "Loaded in " + diff + " milliseconds!";
+                document.getElementById("data").innerHTML = innerHtml;
+            }
+        };
+        xhttp.open("GET", "/whoshome/data", true);
+        xhttp.send();
+    </script>
+</body>
+</html>

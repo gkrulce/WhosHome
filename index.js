@@ -8,6 +8,7 @@ const CONSTANTS_FILE_NAME = "constants.json";
 var express = require('express');
 var app = express();
 var fs = require('fs');
+var dns = require('dns');
 var lastSeen = {};
 var macs_to_users = {}
 
@@ -24,23 +25,37 @@ app.get('/', function (req, res) {
 
 // who's home endpoint
 app.get('/whoshome', function(req, res) {
-    updateLastSeenFromFile();
-    var ret = "";
-    var sortable = [];
-    for(user in lastSeen) {
-        sortable.push([lastSeen[user], user]);
-    }
-    sortable.sort(function(a, b){return b[0]-a[0]});
-    for(i in sortable) {
-        var time = sortable[i][0];
-        var user = sortable[i][1];
-        if(user == "Gateway" || user == "Playstation" ) continue;
-        ret += user;
-        ret += ":";
-        ret += (new Date(lastSeen[user]*1000));
-        ret += "<br />";
-    }
-    res.send(ret);
+    fs.readFile('whoshome.html', 'utf-8', function(err, data) {
+        if(err) throw err;
+        res.send(data);
+    });
+});
+
+app.get('/whoshome/data', function(req, res) {
+    updateLastSeenFromFile(function() {
+        var ret = "";
+        var sortable = [];
+        for(user in lastSeen) {
+            sortable.push([lastSeen[user], user]);
+        }
+        sortable.sort(function(a, b){return b[0]-a[0]});
+        ret = []
+        for(i in sortable) {
+            var time = sortable[i][0];
+            var user = sortable[i][1];
+            if(user == "Gateway" || user == "Playstation" ) continue;
+            ret.push({'date': time, 'user': user});
+        }
+        res.send(ret);
+    });
+});
+app.use('/livecams', function(req, res) {
+    fs.readFile('livecams.html', 'utf-8',  function(err, data) {
+        if(err) {
+            throw err;
+        }
+        res.send(data);
+    });
 });
 
 // Start server
@@ -52,10 +67,9 @@ app.listen(PORT, function () {
 fs.readFile(CONSTANTS_FILE_NAME, 'utf8', function(err, data) {
     if(err) throw err;
     macs_to_users = JSON.parse(data);
-    updateLastSeenFromFile();
 });
 
-function updateLastSeenFromFile() {
+function updateLastSeenFromFile(callback) {
     fs.readFile(FILE_NAME, 'utf8', function(err, data) {
         if(err) throw err;
         lines = data.split("\n");
@@ -89,5 +103,8 @@ function updateLastSeenFromFile() {
             }
         }
         console.log("File read");
+        if(typeof callback != 'undefined') {
+            callback();
+        }
     });
 }
