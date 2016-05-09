@@ -12,6 +12,10 @@ var dns = require('dns');
 var lastSeen = {};
 var macs_to_users = {}
 
+function log(msg) {
+    console.log(msg + "\t" + (new Date()));
+}
+
 // Check we are running as non-priviledged user
 if(process.env.USER != "noded") {
     console.log("Please run as nonpriviledged user noded!!!");
@@ -20,11 +24,13 @@ if(process.env.USER != "noded") {
 
 // Root endpoint
 app.get('/', function (req, res) {
+    log("/");
     res.send('If you don\'t belong here... GO AWAY!!');
 });
 
 // who's home endpoint
 app.get('/whoshome', function(req, res) {
+    log("/whoshome");
     fs.readFile('whoshome.html', 'utf-8', function(err, data) {
         if(err) throw err;
         res.send(data);
@@ -50,6 +56,7 @@ app.get('/whoshome/data', function(req, res) {
     });
 });
 app.use('/livecams', function(req, res) {
+    log("/livecams");
     fs.readFile('livecams.html', 'utf-8',  function(err, data) {
         if(err) {
             throw err;
@@ -102,7 +109,7 @@ function updateLastSeenFromFile(callback) {
                 }
             }
         }
-        console.log("File read");
+        //console.log("File read");
         if(typeof callback != 'undefined') {
             callback();
         }
