@@ -1,0 +1,804 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+body{
+    margin: 0px;
+    padding:0px;
+    font-family: Verdana,Arial,Helvetica,sans-serif;
+    overflow: hidden
+}
+a:link{
+    color: #000000;
+    font-size: 11px;
+}
+a:visited{
+    color: #000000;
+    font-size: 11px;
+}
+a:hover{
+    color: #000000;
+    font-size: 11px;
+}
+.surfline-button {
+    display: inline-block;
+    zoom: 1;
+    vertical-align: baseline;
+    margin: 0 2px;
+    outline: none;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    font: 12px/100% Verdana, Geneva, sans-serif;
+    padding: 10px 14px 10px 14px;
+    text-shadow: 0 1px 1px rgba(0,0,0,.3);
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.2);
+    -moz-box-shadow: 0 1px 2px rgba(0,0,0,.2);
+    box-shadow: 0 1px 2px rgba(0,0,0,.2);
+}
+.surfline-button.blue1 {
+    color: #FFFFFF;
+    border: solid 1px #295284;
+    background: #295284;
+    background: -webkit-gradient(linear, left top, left bottom, from(#295284), to(#010233));
+    background: -moz-linear-gradient(top, #295284, #010233);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#295284', endColorstr='#010233');
+}
+
+
+#message .surfline-button.blue1 {
+    margin-bottom: 12px;
+}
+
+#playerWrapper{
+    width:640px;
+    height:360px;
+    color:#FFFFFF;
+    background-size: cover;
+}
+
+
+#streamEndMessage {
+    color: #000000;
+    position: absolute;
+    border-top: 1px solid #9c9b9b;
+    background-color: rgba(255,255,255,0.85);
+    width: 74%;
+    margin-left:8%;
+    border: 1px solid #000000;
+    text-align: center;
+    padding: 30px 30px 40px 30px;
+    border-radius: 5px;
+    -moz-box-shadow: 0 0 5px #9c9b9b;
+    -webkit-box-shadow: 0 0 5px #9c9b9b;
+    box-shadow: 0 0 5px #9c9b9b;
+    margin-top: 47px;
+}
+
+#marketingTimeoutHeader {
+    font-size: 18px;
+    margin-bottom: 14px;
+}
+
+#continueText {
+    font-size: 11px;
+}
+
+#message{
+    width:100%;
+    height:100%;
+    background-color:#000000;
+    display: none;
+    text-align: center;
+    font-size: 16px;
+    background-size: cover;
+}
+#companion{
+    float: right;
+}
+#cameraDebug{
+    width:100%;
+    border:1px solid #CCC;
+    color:#717171;
+    display: none;
+}
+#cameraDebug ul{
+    list-style:none;
+    line-height:26px;
+    margin:10px 10px 4px 10px;
+    padding:0px;
+}
+#countdownBar{
+    height: 30px;
+    width: 100%;
+    color: #000000;
+    background-color: rgba(255,255,255,0.8);
+    font-size: 10px;
+    margin-top: -30px;
+    padding: 10px;
+    display: none;
+}
+#cameraTimestamp{
+    display: none;
+}
+</style>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.0/jquery.min.js"></script>
+<script src="https://www.surfline.com/global_includes/jwplayer/6.9/jwplayer.js"></script>
+<script> jwplayer.key="YS4xpgH6/2TvlkxzmcyourFpS9w0jKSbd8cRcA==";</script>
+<script src="https://www.surfline.com/global_includes/jwplayer/6.9/jwplayer.html5.js"></script>
+<script src="https://www.surfline.com/global_includes/functions/tracking/html_tracking.js"></script>
+
+</head>
+<body>
+
+
+<div id="playerWrapper">
+    <div id="message"></div>
+    <div id="camera"></div>
+    <div id="countdownBar">This camera will automatically continue in <span id="marketingCountdown">00</span> seconds</div>
+    <br clear="all">
+</div>
+
+
+<div id="cameraDebug">
+    <ul style="width:40%; float:left">
+        <li>User Timeout Countdown: <span id="countdown"></span></li>
+        <li>Type: <span id="utype"></span></li>
+        <li>Status: <span id="streamStatus">Unknown</span></li>
+    </ul>
+    <ul style="float:left">
+        <li>IsRecorded: <span id="isRecorded"></span></li>
+        <li>Local Time(Hr): <span id="currentTimeHr"></span> , tz:<span id="localTzo"></span></li>
+        <li>Off: <span id="hourTimeOff"></span> , On: <span id="hourTimeOn"></span></li>
+    </ul>
+    <br clear="all">
+</div>
+
+
+
+
+
+<script>
+function getURLParameter(sParam){
+    try{
+        var sPageURL = window.location.search.substring(1);
+        var sURLVariables = sPageURL.split('&');
+        for(var i = 0; i < sURLVariables.length; i++){
+            var sParameterName = sURLVariables[i].split('=');
+            if (sParameterName[0] == sParam){
+                return sParameterName[1];
+            }
+        }
+    }catch(ex){
+        if(console){
+            console.log('ad error: ',ex)
+        }
+    }
+}
+
+// resize player by 16:9 aspect for responsive websites
+function sizePlayer(){
+    var pageWidth = jQuery('body').width();
+    var pageWidth = pageWidth;
+    var ratio = 16/9;
+    var height = (pageWidth/ratio);
+    playerWidth = pageWidth;
+    playerHeight = height;
+    jQuery('#camera_wrapper, #playerWrapper, #camera').width(pageWidth).height(height);
+}
+jQuery(window).bind('resize', function (){
+    sizePlayer()
+})
+sizePlayer()
+
+var cameraCurrentTime = 30000,
+    cameraCurrentTimeReset = 30000,
+    marketingCurrentTime = 15000,
+    marketingCurrentTimeReset = 15000,
+    incompatible = false,
+    adStatus = false,
+    androidVersion,
+    incompatible = false,
+    userType = "free",
+    streamStatus = true,
+    debug = false,
+    spotid = getURLParameter('id'),
+    embedWidth =  ((640/0.94)-640),
+    helpWidth =  ((640/0.94)-640),
+    btnWidth = (640-helpWidth)/2,
+    isRecorded = false,
+    tzo = -7,
+    noTag = false,
+    sitepage = "www.surfline.com/cam/socal/la/elportocam",
+    marketingTimeoutHTML = "",
+    slClickThruLink = "http://www.surfline.com",
+    camName = "SURFLINE",
+    camStatusToggle = "";
+
+
+//debug
+if(debug){
+    jQuery('#cameraDebug').show();
+}
+
+//android detection
+function checkForAndroid(ua){
+    var ua = ua || navigator.userAgent;
+    var match = ua.match(/Android\s([0-9\.]*)/);
+    return match ? match[1] : false;
+};
+var androidVersion = parseFloat(checkForAndroid());
+if(androidVersion <= 4.0){
+    jQuery('#camera').hide();
+    jQuery('#message').css("background","url('https://www.surfline.com/global_includes/jwplayer/6.9/img/android-message-bg.jpg')")
+    jQuery('#message').html('<div style="color:#717171; padding:180px 40px 30px 40px; font-size:18px; font-weight:bold; line-height:30px;">Live streaming support is only be available for<BR> Android v4.1 and above.</div>').show()
+    incompatible = true;
+}else if (androidVersion >= 4.1){
+    cameraCurrentTime = cameraCurrentTime+15000
+    cameraCurrentTimeReset = cameraCurrentTime+15000
+    marketingCurrentTime = cameraCurrentTime+15000
+    marketingCurrentTimeReset = cameraCurrentTime+15000
+}
+
+
+// camera time
+function setCameraTime(cameraTimestamp){
+    jQuery('#cameraTimestamp').html(cameraTimestamp)
+}
+function startCameraTime(type){
+    if(type == "onStart"){
+        d = new Date();
+        utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+        newDateWithOffset = new Date(utc + (3600000*tzo));
+        setCameraTime(newDateWithOffset.toLocaleTimeString());
+    }else{
+        timeInterval = window.setInterval(function(){
+            d = new Date();
+            utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+            newDateWithOffset = new Date(utc + (3600000*tzo));
+            setCameraTime(newDateWithOffset.toLocaleTimeString());
+        },1000);
+    }
+
+    if(isRecorded == "false"){
+        jQuery('#cameraTimestamp').show()
+    }
+
+}
+startCameraTime('onStart')
+
+// camera stream is down
+function streamDown(message){
+    if(console){
+        console.log('stream down')
+    }
+    jQuery('#camera').hide();
+    jQuery('#message').css("background","url('https://www.surfline.com/global_includes/jwplayer/6.9/img/surfline-message-bg.jpg')")
+    if(message){
+        jQuery('#message').html('<BR><BR><BR><div style="color:#717171; padding:80px 40px 30px 40px; font-size:14px; font-weight:bold; line-height:20px;"><div style="font-size:18px;">Stream Unavailable</div><BR>'+message).show()
+    }else{
+        jQuery('#message').html('<BR><BR><BR><div style="color:#717171; padding:80px 40px 30px 40px; font-size:14px; font-weight:bold; line-height:20px;"><div style="font-size:18px;">Stream Unavailable</div><BR>At this time this camera stream is unavailable. More information will be posted shortly. Sorry for the inconvenience.</div>').show()
+    }
+    jQuery('#message').show()
+}
+
+
+//countdowns
+function pad(number, length){
+    var str = '' + number;
+    while (str.length < length) {str = '0' + str;}
+    return str;
+}
+function formatTime(time){
+    time = time / 10;
+    var min = parseInt(time / 6000),
+        sec = parseInt(time / 100) - (min * 60),
+        hundredths = pad(time - (sec * 100) - (min * 6000), 2);
+    if(min > 0){
+        var returnTime = (min > 0 ? pad(min, 2) : "00") + ":" + pad(sec, 2)
+    }else{
+        var returnTime = pad(sec, 2)
+    }
+    return returnTime;
+}
+
+
+
+(function($) {
+    jQuery.timer = function(func, time, autostart) {
+        this.set = function(func, time, autostart) {
+            this.init = true;
+            if(typeof func == 'object') {
+                var paramList = ['autostart', 'time'];
+                for(var arg in paramList) {if(func[paramList[arg]] != undefined) {eval(paramList[arg] + " = func[paramList[arg]]");}};
+                func = func.action;
+            }
+            if(typeof func == 'function') {this.action = func;}
+            if(!isNaN(time)) {this.intervalTime = time;}
+            if(autostart && !this.isActive) {
+                this.isActive = true;
+                this.setTimer();
+            }
+            return this;
+        };
+        this.once = function(time) {
+            var timer = this;
+            if(isNaN(time)) {time = 0;}
+            window.setTimeout(function() {timer.action();}, time);
+            return this;
+        };
+        this.play = function(reset) {
+            if(!this.isActive) {
+                if(reset) {this.setTimer();}
+                else {this.setTimer(this.remaining);}
+                this.isActive = true;
+            }
+            return this;
+        };
+        this.pause = function() {
+            if(this.isActive) {
+                this.isActive = false;
+                this.remaining -= new Date() - this.last;
+                this.clearTimer();
+            }
+            return this;
+        };
+        this.stop = function() {
+            this.isActive = false;
+            this.remaining = this.intervalTime;
+            this.clearTimer();
+            return this;
+        };
+        this.toggle = function(reset) {
+            if(this.isActive) {this.pause();}
+            else if(reset) {this.play(true);}
+            else {this.play();}
+            return this;
+        };
+        this.reset = function() {
+            this.isActive = false;
+            this.play(true);
+            return this;
+        };
+        this.clearTimer = function() {
+            window.clearTimeout(this.timeoutObject);
+        };
+        this.setTimer = function(time) {
+            var timer = this;
+            if(typeof this.action != 'function') {return;}
+            if(isNaN(time)) {time = this.intervalTime;}
+            this.remaining = time;
+            this.last = new Date();
+            this.clearTimer();
+            this.timeoutObject = window.setTimeout(function() {timer.go();}, time);
+        };
+        this.go = function() {
+            if(this.isActive) {
+                this.action();
+                this.setTimer();
+            }
+        };
+
+        if(this.init) {
+            return new $.timer(func, time, autostart);
+        } else {
+            this.set(func, time, autostart);
+            return this;
+        }
+    };
+})(jQuery);
+
+
+var camera_cdt = new(function(){
+    var incrementTime = 100;
+
+    jQuery(function(){
+        camera_cdt.Timer = jQuery.timer(updateTimer, incrementTime, true);
+        camera_cdt.Timer.pause();
+    });
+    function updateTimer(){
+        var timeString = formatTime(cameraCurrentTime);
+        jQuery('#countdown').html(timeString);
+        if(cameraCurrentTime == 0){
+            camera_cdt.Timer.stop();
+            streamEnd('camera')
+            return;
+        }
+        cameraCurrentTime -= incrementTime;
+        if (cameraCurrentTime < 0) cameraCurrentTime = 0;
+    }
+});
+
+
+
+var marketing_cdt = new(function(){
+    var marketingIncrementTime = 100;
+    jQuery(function(){
+        marketing_cdt.Timer = jQuery.timer(updateMarketingTimer, marketingIncrementTime, true);
+        marketing_cdt.Timer.pause();
+    });
+    function updateMarketingTimer(){
+        var marketingTimeString = formatTime(marketingCurrentTime);
+        jQuery('#marketingCountdown').html(marketingTimeString);
+        if(marketingCurrentTime == 0){
+            marketing_cdt.Timer.stop();
+            reloadPage('camera')
+            return;
+        }
+        marketingCurrentTime -= marketingIncrementTime;
+        if (marketingCurrentTime < 0) marketingCurrentTime = 0;
+    }
+});
+
+
+
+// buffer tracking
+var bufferInterval;
+var perBufferCount= 0;
+var bufferTotalCount= 0;
+var perBufferCountArray = []
+function startBufferIntervalCount(){
+    bufferInterval = setInterval(function(){
+        bufferTotalCount++
+        perBufferCount++
+    }, 1000);
+}
+function stopBufferIntervalCount(){
+    perBufferCountArray.push(perBufferCount)
+    perBufferCount = 1;
+    clearInterval(bufferInterval);
+}
+function getTotalBufferStats(){
+    if(console){
+        console.log('Buffer periods and the times:',perBufferCountArray,perBufferCountArray.toString() )
+    }
+}
+
+
+// the messaging when the camera has timed out
+function streamEnd(type){
+    window.clearInterval(timeInterval)
+    stopBufferIntervalCount()
+    getTotalBufferStats()
+    perBufferCountArray = []
+    adStatus = false;
+    if(console){
+        console.log('stream end')
+    }
+    jQuery('#message').show()
+    jwplayer().resize(1,1)
+    jQuery('#camera_wrapper, #camera').width(1).height(1)
+
+    if(isRecorded == true || isRecorded == "true" ){
+        jQuery( "#camera_wrapper, #camera" ).fadeTo( "slow" , 0.01, function() {
+            //alert("out")
+        });
+    }
+
+    if(streamStatus == true){
+        setTimeout(function(){
+            jQuery('#countdownBar').show()
+        },200)
+    }
+
+    cameraCurrentTime = cameraCurrentTimeReset;
+    marketingCurrentTime = marketingCurrentTimeReset;
+
+    marketing_cdt.Timer.play();
+    camera_cdt.Timer.pause()
+    jQuery('#message').html('<div id="streamEndMessage">'+marketingTimeoutHTML+'<br clear="all"></div>')
+
+}
+
+// reload from marketing message
+function reloadPage(type){
+    jQuery('#countdownBar').hide()
+
+    if(streamStatus == false){
+        jQuery('#continueText a').text("Reloading...")
+        location.reload();
+    }else{
+        jQuery('#continueText a').text("Reloading Camera...")
+        adStatus = false;
+        marketing_cdt.Timer.pause();
+        marketingCurrentTime = marketingCurrentTimeReset;
+        jwplayer().play();
+        setTimeout(function(){
+
+            
+                jwplayer().playAd(adTag)
+            
+
+            jQuery('#message').hide()
+            jwplayer().resize(playerWidth,playerHeight)
+            jQuery('#camera_wrapper, #camera').width(playerWidth).height(playerHeight)
+
+        },1000)
+    }
+    if(isRecorded == true || isRecorded == "true" ){
+        jQuery( "#camera_wrapper, #camera" ).fadeTo( "slow" , 1, function() {
+            //alert("in")
+        });
+    }
+}
+
+
+function loadCameraPlayer(cameraStream,adTag){
+    if(noTag){
+        adTag = "";
+    }
+
+    jwplayer("camera").setup({
+        flashplayer: "https://www.surfline.com/global_includes/jwplayer/6.9/jwplayer.flash.swf",
+        file:cameraStream,
+        androidhls: true,
+        skin:'five',
+        width:playerWidth,
+        height:playerHeight,
+        autostart: true,
+        
+        advertising:{
+            client:"vast",
+            tag:adTag
+        },
+        abouttext: "illegal setup of Surfline embed player",
+        aboutlink: slClickThruLink,
+        
+        logo:{
+            file:'logo.png',
+            link: slClickThruLink,
+            position:'top-left',
+            margin:4
+        }
+    });
+
+    jwplayer().onReady(function() {
+        loadReportPage()
+    })
+
+    jwplayer().onAdImpression(function(){
+            adStatus = true;
+            if(console){
+                console.log('onAdImpression',adStatus)
+            }
+            jQuery('#streamStatus').text("Ad Playing")
+
+        }).onAdComplete(function(){
+            if(console){
+                console.log('ad complete')
+            }
+            cameraCurrentTime = cameraCurrentTimeReset;
+            camera_cdt.Timer.play();
+
+            // switch top message after ad
+            jQuery('#marketingTopMessage').fadeTo("normal",0.0001, function(){
+                jQuery(this).html(marketingTopMessage2).fadeTo("normal",1, function(){
+                });
+            });
+
+        }).onAdError(function(){
+            adStatus = true;
+            if(console){
+                console.log('ad error',adStatus)
+            }
+            cameraCurrentTime = cameraCurrentTimeReset;
+            camera_cdt.Timer.play();
+            loadExternalCompanion()
+
+            // switch top message after ad
+            jQuery('#marketingTopMessage').fadeTo("normal",0.0001, function(){
+                jQuery(this).html(marketingTopMessage2).fadeTo("normal",1, function(){
+                });
+            });
+
+
+        }).onError(function(message){
+             if(console){
+                console.log('error:',message.message)
+            }
+
+            if(message.message.indexOf('No levels to play') != -1 && camStatusToggle == "up"){
+               
+                if(console){
+                    console.log('sent message', spotid + ':'+message.message)
+                }
+                streamDown()
+            }
+
+
+            // stream has timed out due to secuirty length
+            if(streamStatus == true){
+                streamStatus = false
+                streamEnd()
+            // stream status is down from the start
+            }else{
+                streamDown()
+            }
+
+            camera_cdt.Timer.pause();
+            marketing_cdt.Timer.pause();
+            cameraCurrentTime = cameraCurrentTimeReset;
+            marketingCurrentTime = marketingCurrentTimeReset;
+            var errorMessage = message.message.toString()
+            if(adStatus == true){
+                jQuery('#streamStatus').text("Stream Expired")
+            }else{
+                jQuery('#streamStatus').text("Stream Error")
+            }
+
+        }).onIdle(function(){
+            if(console){
+                console.log('onIdle')
+            }
+            jQuery('#streamStatus').text("Idle")
+            camera_cdt.Timer.pause();
+
+        }).onBuffer(function(){
+            if(console){
+                console.log('onBuffer')
+            }
+            if(adStatus == true){
+                startBufferIntervalCount()
+                jQuery('#streamStatus').text("Buffering")
+            }else{
+                jQuery('#streamStatus').text("Ad Buffering")
+            }
+           camera_cdt.Timer.pause();
+
+        }).onPause(function(){
+            jQuery('#streamStatus').text("Pause")
+            camera_cdt.Timer.pause();
+
+        }).onPlay(function(){
+            if(adStatus == true){
+                stopBufferIntervalCount()
+                jQuery('#streamStatus').text("Playing")
+                camera_cdt.Timer.play();
+            }else{
+                jQuery('#streamStatus').text("Ad Playing")
+            }
+            startCameraTime();
+    });
+}
+
+
+
+
+
+jQuery(function(){
+    jQuery.ajax({
+        url:"https://api.surfline.com/v1/cams/" + spotid,
+        type: "GET",
+        dataType: "jsonp",
+        success : function(responseData){
+
+            if(console){
+                console.log(responseData.streamInfo.stream[0])
+            }
+            var data = responseData.streamInfo.stream[0];
+
+
+            //click thru sef link building
+            var camRegion = data.camRegion.replace(/[^a-zA-Z0-9]/g," ").replace(/["']/g, "").replace(/\s+/g,"-").replace(/_/g, " ").replace(/\s"/g, "-").replace(/\//g,"-").replace(/,/g , "").replace("?", "").replace(":", "").toLowerCase();
+            var camSubregion = data.camSubregion.replace(/[^a-zA-Z0-9]/g," ").replace(/["']/g, "").replace(/\s+/g,"-").replace(/_/g, " ").replace(/\s"/g, "-").replace(/\//g,"-").replace(/,/g , "").replace("?", "").replace(":", "").toLowerCase();
+            camName = data.camName.replace(" HD Cam","").replace("HD Cam","").replace(/[^a-zA-Z0-9]/g," ").replace(/["']/g, "").replace(/\s+/g,"-").replace(/_/g, " ").replace(/\s"/g, "-").replace(/\//g,"-").replace(/,/g , "").replace("?", "").replace(":", "").toLowerCase();
+            var camSlug = camName+"-"+camRegion+"_"+spotid;
+            slClickThruLink = "http://www.surfline.com/redirect/?url=http%3A//www.surfline.com/surf-report/"+camSlug+"/&code=SYNDICATIONPLAYER&subcode="+spotid;
+
+
+            // tracking data requires global_include js file
+            var trackingData = {
+                "pageName":data.camName + " Embed",
+                "spot":data.camName,
+                "id":spotid,
+                "channel":"Embed Cameras",
+                "area":data.camArea,
+                "region":data.camRegion,
+                "subregion":data.camSubregion,
+                "camtype":"tableau"
+            }
+            sendTrackingData(trackingData)
+
+
+
+
+
+            // stream status
+            camStatusToggle = data.camStatus
+            if(data.camStatus != "up"){
+
+                // camera down text
+                streamDown(data.messageText)
+                streamStatus = false;
+            }else{
+
+                // camera up with a message text
+                streamStatus = true;
+            }
+
+
+
+
+
+
+            // set timezone for camera time vs local machine time
+            tzo = data.camTzo;
+            jQuery('#localTzo').html(data.camTzo);
+            jQuery('#currentTimeHr').html(data.currentTime);
+            jQuery('#hourTimeOff').html(data.hourTimeOff);
+            jQuery('#hourTimeOn').html(data.hourTimeOn);
+
+
+            // oas virtual temp URL for camera VAST
+            sitepage = "www.surfline.com"+data.oas_virtualurl_temp;
+
+
+            // background image
+            if(data.camImage.indexOf('small') != -1 ){
+                camImage = data.camImage.replace('small','full')
+            }else{
+                camImage = data.camImage
+            }
+            if(data.camStatus == "up"){
+                jQuery('#message').css({'background-image':'url("'+camImage+'")'})
+            }
+
+
+            // timeout messaging and ad flip if premium partner
+            cameraCurrentTime = data.timeout*1000;
+            cameraCurrentTimeReset = data.timeout*1000;
+            marketingTimeoutHTML = data.syndicationTimeoutHTML;
+            
+            cameraCurrentTime = 30000;
+            cameraCurrentTimeReset = 30000;
+            
+
+
+
+            // recorded stream status and or if nighttime at camera location
+            isRecorded = data.isRecorded;
+            jQuery('#isRecorded').html(isRecorded)    //special case for trestles
+            if(isRecorded == "true" && data.camAlias != "upperscam" && data.camAlias != "trestlescam" && data.camTypeFromQuickSpot != "Video Upload"){
+                cameraCurrentTime = 9000000000;
+                cameraCurrentTimeReset = 9000000000;
+            }else{
+                
+                if(data.camAlias == "upperscam" || data.camAlias == "trestlescam" || data.camTypeFromQuickSpot == "Video Upload"){
+                    cameraCurrentTime = 30000;
+                    cameraCurrentTimeReset = 30000;
+                }else{
+                     cameraCurrentTime = 30000;
+                     cameraCurrentTimeReset = 30000;
+                }
+                
+            }
+
+            // load stream and ad
+            if(responseData.streamInfo.stream[0] && incompatible == false && streamStatus == true){
+                adTag = "http://oascentral.surfline.com/RealMedia/ads/adstream_sx.ads/"+sitepage+"@x35?keyword="+userType;
+                loadCameraPlayer(responseData.streamInfo.stream[0].file,adTag)
+            }
+
+        }, //end success
+
+        error : function(err){
+             console.log("ERR", err);
+        }
+    });
+})
+</script>
+
+</body>
+</html>
+
+
+
+
+
+

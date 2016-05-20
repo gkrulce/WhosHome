@@ -4,6 +4,8 @@
   "description": "Creates a simple HTTP endpoint for web interface",
   "main": "index.js",
   "dependencies": {
-    "express": "^4.13.4"
+    "express": "^4.13.4",
+    "express-session": "^1.13.0",
+    "morgan": "^1.7.0"
   }
 }

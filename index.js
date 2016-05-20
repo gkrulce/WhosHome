@@ -1,6 +1,13 @@
 // TODO
-// 1) Read only recently inserted line when file changes
-// 2) Have python script read constants.json instead of constants.py
+// 1) Have python script read constants.json instead of constants.py
+
+// Check we are running as non-priviledged user
+// Root endpoint
+if(process.env.USER != "noded") {
+    console.log("Please run as nonpriviledged user noded!!!");
+    return;
+}
+
 const PORT = 8000
 const FILE_NAME = "machineReadable.txt";
 const CONSTANTS_FILE_NAME = "constants.json";
@@ -9,32 +16,17 @@ var express = require('express');
 var app = express();
 var fs = require('fs');
 var dns = require('dns');
+var morgan = require('morgan');
+var session = require('express-session');
 var lastSeen = {};
 var macs_to_users = {}
 
-function log(msg) {
-    console.log(msg + "\t" + (new Date()));
-}
+morgan.token('session', function(req, res) {return req.sessionID;}) //Log the session cookie
+app.use(morgan(':session :remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"')) // Morgan logging framework
+app.use(session({resave:false, saveUninitialized: true, secret: "NO_HAX_PLZ!"}));
 
-// Check we are running as non-priviledged user
-if(process.env.USER != "noded") {
-    console.log("Please run as nonpriviledged user noded!!!");
-    return;
-}
-
-// Root endpoint
 app.get('/', function (req, res) {
-    log("/");
     res.send('If you don\'t belong here... GO AWAY!!');
-});
-
-// who's home endpoint
-app.get('/whoshome', function(req, res) {
-    log("/whoshome");
-    fs.readFile('whoshome.html', 'utf-8', function(err, data) {
-        if(err) throw err;
-        res.send(data);
-    });
 });
 
 app.get('/whoshome/data', function(req, res) {
@@ -55,15 +47,8 @@ app.get('/whoshome/data', function(req, res) {
         res.send(ret);
     });
 });
-app.use('/livecams', function(req, res) {
-    log("/livecams");
-    fs.readFile('livecams.html', 'utf-8',  function(err, data) {
-        if(err) {
-            throw err;
-        }
-        res.send(data);
-    });
-});
+
+app.use(express.static('public', {extensions: ['html']})); // Serve static HTML from public folder
 
 // Start server
 app.listen(PORT, function () {

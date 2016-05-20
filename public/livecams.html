@@ -1,0 +1,89 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8">
+
+<title>Sexy Livecams</title>
+
+<!--[if lt IE 9]>
+<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+</head>
+
+<body>
+<div id="videoArea">
+    <!--
+    <div id="video0">
+        <div id="title0">
+        </div>
+        <div id="iframe0">
+        </div>
+    </div>
+    -->
+</div>
+<script>
+    dict = [
+        {"name": "La Jolla Shores", "id": 4812, "shown": false},
+        {"name": "Scripps", "id": 4246, "shown": false},
+        {"name": "Cardiff", "id": 4786, "shown": false},
+        {"name": "Pipes", "id": 4790, "shown": false}
+    ];
+    
+    SRC_URL = "SurflineBase.html?id={id}";
+    HEADER_HIDDEN_HTML = '<span class="h1"> {name} </span> <button type="button" class="btn btn-primary" onclick="showRegion({id});">Show</button>';
+    HEADER_SHOWN_HTML = '<span class="h1"> {name} </span> <button type="button" class="btn btn-primary" onclick="hideRegion({id});">Hide</button>';
+    IFRAME_HTML = '<iframe allowfullscreen="" frameborder="0" height="360" width="640" scrolling="no" src="{src}"></iframe>';
+    VIDEOAREA_HTML = '<div id="{videoId}"><div id="{titleId}"></div><div id="{frameId}"></div></div>';
+    var innerHtml= "";
+
+    for(var i = 0 ; i < dict.length ; i++) {
+        innerHtml = innerHtml + VIDEOAREA_HTML.replace("{videoId}", "video"+i).replace("{titleId}", "title"+i).replace("{frameId}", "iframe"+i);
+    }
+    document.getElementById("videoArea").innerHTML = innerHtml;
+
+    for(var i = 0 ; i < dict.length ; i++) {
+        var h = HEADER_HIDDEN_HTML.replace("{name}", dict[i]['name']).replace("{id}", i);
+        document.getElementById("title"+i).innerHTML = h;
+    }
+
+    function showRegion(i) {
+        // Show iFrame
+        var s = SRC_URL.replace("{id}", dict[i]['id']);
+        var ifr = IFRAME_HTML.replace("{src}", s);
+        document.getElementById("iframe"+i).innerHTML = ifr;
+
+        // Swap header
+        var h = HEADER_SHOWN_HTML.replace("{name}", dict[i]['name']).replace("{id}", i);
+        document.getElementById("title"+i).innerHTML = h;
+    }
+
+    function hideRegion(i) {
+        // Hide iFrame 
+        document.getElementById("iframe"+i).innerHTML = "";
+
+        // Swap header
+        var h = HEADER_HIDDEN_HTML.replace("{name}", dict[i]['name']).replace("{id}", i);
+        document.getElementById("title"+i).innerHTML = h;
+    }
+    /*for(var i = 0 ; i < dict.length ; i++) {
+        var d = dict[i];
+        var s = SRC_URL.replace("{id}", d['id']);
+        var h = HEADER_HTML.replace("{name}", d['name']);
+        var ifr = IFRAME_HTML.replace("{src}", s);
+        if(d['shown']) {
+            innerHtml= innerHtml+ h + ifr;
+        }else {
+            innerHtml= innerHtml+ h;
+        }
+    }*/
+</script>
+<script   src="https://code.jquery.com/jquery-2.2.3.min.js"   integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo="   crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+<!--<h1> La Jolla Shores </h1><br />
+<iframe allowfullscreen="" frameborder="0" height="360" width="640" scrolling="no" src="https://www.surfline.com/syndication/embed/v1/player-secure.cfm?id=4812&oid=121223&key=204a53402e23736b407c5a243e"></iframe>
+<iframe src="https://www.surfline.com/syndication/embed/v1/player-secure.cfm?id=4786&oid=121223&key=204a53402e23736b407c5a243e"></iframe>-->
+</body>
+</html>
